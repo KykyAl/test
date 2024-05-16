@@ -1,6 +1,7 @@
 # Tes 
-A new Flutter project.
-
+Jika ingin Menjalankannya ini saya masih di local 
+harus setup terlebih dahulu dengan mengkoneksikan database dan file file phpnya . 
+bisa di install di lsit folder nya dengan git clone dan di pindahkan file extensinya uat folder baru  dan tablenya di import sqlnya ke local 
 ##  install apliaksi di google drive 
 https://drive.google.com/file/d/1Y94obrGPrtNraHnM7yebNbIJbifDxJPd/view?usp=sharing
 
