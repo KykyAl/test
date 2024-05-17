@@ -156,6 +156,7 @@ class ProfileController extends GetxController {
 
   getIdList() async {
     try {
+      listResponseEntity.clear();
       final response = await getList();
       final responseDecode = jsonDecode(response.body);
       log("profile ${responseDecode}");

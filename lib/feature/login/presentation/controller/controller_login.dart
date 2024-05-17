@@ -93,16 +93,15 @@ class LoginController extends GetxController {
     final response = await regis(body: body);
     final responseDecode = jsonDecode(response.body);
     if (responseDecode['message'] == 'Registrasi berhasil') {
-      if (name.value.text.isEmpty ||
-          username.value.text.isEmpty ||
-          password.value.text.isEmpty) {
-        Get.snackbar('Error', 'Semua field harus diisi',
-            backgroundColor: Colors.red, colorText: colorWhite);
-      } else {
-        Get.snackbar('Success', 'Pendaftaran berhasil',
-            backgroundColor: colorPrimary, colorText: colorWhite);
-        Get.offAllNamed(navigatorHelper.login);
-      }
+    } else if (name.value.text.isEmpty ||
+        username.value.text.isEmpty ||
+        password.value.text.isEmpty) {
+      Get.snackbar('Error', 'Semua field harus diisi',
+          backgroundColor: Colors.red, colorText: colorWhite);
+    } else {
+      Get.snackbar('Success', 'Pendaftaran berhasil',
+          backgroundColor: colorPrimary, colorText: colorWhite);
+      Get.offAllNamed(navigatorHelper.login);
     }
   }
 
