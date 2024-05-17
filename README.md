@@ -1,8 +1,9 @@
-# brief_project
-
-A new Flutter project.
-
-## Getting Started
+# Tes 
+Jika ingin Menjalankannya ini saya masih di local 
+harus setup terlebih dahulu dengan mengkoneksikan database dan file file phpnya . 
+bisa di install di lsit folder nya dengan git clone dan di pindahkan file extensinya buat folder baru  dan tablenya di import sqlnya ke local 
+##  install apliaksi di google drive 
+https://drive.google.com/file/d/1Y94obrGPrtNraHnM7yebNbIJbifDxJPd/view?usp=sharing
 
 This project is a starting point for a Flutter application.
 
