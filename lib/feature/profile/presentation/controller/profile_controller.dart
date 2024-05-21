@@ -21,30 +21,36 @@ class ProfileController extends GetxController {
   final NavigatorHelper navigatorHelper = NavigatorHelper();
   final RemoteUsecase remoteUsecase = RemoteUsecase();
   final ImagePicker _picker = ImagePicker();
-  Rx<File> selectedImage = File('').obs;
+  Rx<File?> selectedImage = File('').obs;
   Rx<bool> changePhoto = false.obs;
+  RxBool getListDone = false.obs;
   RxString username = ''.obs;
+  List<TextEditingController> textControllers = [];
+
   RxList<ResponseListEntity> listResponseEntity = <ResponseListEntity>[].obs;
   Rx<GlobalKey<ScaffoldState>> scaffoldState = GlobalKey<ScaffoldState>().obs;
-
+  Rx<ResponseListEntity> selectedindexlist =
+      ResponseListEntity.fromJson({}).obs;
   Rx<double> lat = 0.0.obs;
   Rx<double> long = 0.0.obs;
   Rx<String> street = ''.obs;
   Rx<int> count = 0.obs;
   Rx<File> photoValueLetter = File('').obs;
-
-  resetImage() {
-    changePhoto.value = false;
-    selectedImage.value = File('');
-  }
+  var controllerAuth = Get.put(AuthController());
 
   getDatauser() {
     getIdList();
     getLocation();
+    listResponseEntity.listen((_) {
+      textControllers = List.generate(
+          listResponseEntity.length, (index) => TextEditingController());
+      log(listResponseEntity.length.toString());
+    });
+    log(listResponseEntity.length.toString());
   }
 
   onLogOut() async {
-    await SessionHelper.deleteUsername();
+    controllerAuth.logout();
     Get.offAllNamed(navigatorHelper.root);
   }
 
@@ -52,10 +58,10 @@ class ProfileController extends GetxController {
     try {
       final pickedFile = await _picker.pickImage(source: source);
       if (pickedFile != null) {
-        final image = File(pickedFile.path);
-        selectedImage.value = image;
+        selectedImage.value = File(pickedFile.path);
+        submitData(selectedImage.value!.path);
       } else {
-        Get.back();
+        print('No imgage');
       }
     } catch (e) {
       print('Error: $e');
@@ -66,71 +72,121 @@ class ProfileController extends GetxController {
     try {
       final pickedFile = await _picker.pickImage(source: source);
       if (pickedFile != null) {
-        final image = File(pickedFile.path);
-        selectedImage.value = image;
+        selectedImage.value = File(pickedFile.path);
+        submitData(selectedImage.value!.path);
       } else {
-        Get.back();
+        print('No imgage');
       }
     } catch (e) {
       print('Error: $e');
     }
   }
 
+  Future<void> submitData(String filePath) async {
+    var uri = Uri.parse('http://192.168.3.105/kendaraan/update.php');
+    var request = http.MultipartRequest('POST', uri);
+
+    request.files
+        .add(await http.MultipartFile.fromPath('fileToUpload', filePath));
+    request.fields['nomerRegistrasi'] =
+        selectedindexlist.value.NomerRegistrasi.toString();
+
+    try {
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        print('Data sent successfully');
+        getIdList();
+      } else {
+        print('Failed to send data');
+      }
+      print("Response: $responseBody");
+    } catch (e) {
+      print('Error uploading file: $e');
+    }
+  }
+
+  Future<void> submitBodyTemperature(int index) async {
+    var uri = Uri.parse('http://192.168.3.105/kendaraan/updateTemeperatur.php');
+
+    try {
+      var response = await http.post(
+        uri,
+        body: {
+          'nomerRegistrasi': selectedindexlist.value.NomerRegistrasi.toString(),
+          'body_temperature': textControllers[index].text,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Data sent successfully');
+        getIdList();
+      } else {
+        print('Failed to send data');
+      }
+      print("Response: ${response.body}");
+    } catch (e) {
+      print('Error sending data: $e');
+    }
+  }
+
   showValidatedOpenCamOrGallery() {
-    scaffoldState.value.currentState!.showBottomSheet(
-        backgroundColor: colorTransparant,
-        (context) => Container(
-              padding: EdgeInsets.all(20),
-              height: 140,
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: colorWhite,
-                boxShadow: [
-                  BoxShadow(
-                    color: colorGray,
-                    offset: Offset(3, 3),
-                    blurRadius: 10,
-                  )
-                ],
-              ),
-              child: Column(
+    scaffoldState.value.currentState!
+        .showBottomSheet(backgroundColor: colorTransparant, (context) {
+      return Container(
+        padding: EdgeInsets.all(20),
+        height: 140,
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: colorWhite,
+          boxShadow: [
+            BoxShadow(
+              color: colorGray,
+              offset: Offset(3, 3),
+              blurRadius: 10,
+            )
+          ],
+        ),
+        child: Column(
+          children: [
+            InkWell(
+              onTap: () => pickgallery(ImageSource.gallery),
+              child: Row(
                 children: [
-                  InkWell(
-                    onTap: () => pickgallery(ImageSource.gallery),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.photo,
-                          color: colorPrimary,
-                        ),
-                        resolutionSize.mediumResolutionSpaceWidth,
-                        Text(
-                          'Buka galeri',
-                          style: materialTextStyle.normalTextStyle,
-                        ),
-                      ],
-                    ),
+                  Icon(
+                    Icons.photo,
+                    color: colorPrimary,
                   ),
-                  resolutionSize.largeResolutionSpaceHeight,
-                  InkWell(
-                    onTap: () => pickImage(ImageSource.camera),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.camera_alt_outlined,
-                          color: colorPrimary,
-                        ),
-                        resolutionSize.mediumResolutionSpaceWidth,
-                        Text(
-                          'Buka Camera',
-                          style: materialTextStyle.normalTextStyle,
-                        ),
-                      ],
-                    ),
+                  resolutionSize.mediumResolutionSpaceWidth,
+                  Text(
+                    'Buka galeri',
+                    style: materialTextStyle.normalTextStyle,
                   ),
                 ],
               ),
-            ));
+            ),
+            resolutionSize.largeResolutionSpaceHeight,
+            InkWell(
+              onTap: () => pickImage(ImageSource.camera),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.camera_alt_outlined,
+                    color: colorPrimary,
+                  ),
+                  resolutionSize.mediumResolutionSpaceWidth,
+                  Text(
+                    'Buka Camera',
+                    style: materialTextStyle.normalTextStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   getLocation() async {
@@ -156,6 +212,7 @@ class ProfileController extends GetxController {
 
   getIdList() async {
     try {
+      getListDone.value = false;
       listResponseEntity.clear();
       final response = await getList();
       final responseDecode = jsonDecode(response.body);
@@ -167,11 +224,13 @@ class ProfileController extends GetxController {
           listResponseEntity.add(ResponseListEntity.fromJson(element));
           log("LIST ${listResponseEntity.length}");
         }
+        getListDone.value = true;
       } else {
         print("tidak berjalan");
       }
-    } catch (e) {}
-    return {};
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<http.Response> getList() {

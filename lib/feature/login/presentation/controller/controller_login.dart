@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:brief_project/core/helper/session.dart';
 import 'package:brief_project/feature/login/domain/useCase/remote_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,31 +28,30 @@ class LoginController extends GetxController {
     name.value = TextEditingController(text: '');
     username.value = TextEditingController(text: '');
     password.value = TextEditingController(text: '');
-    inLogin();
     requestLocationPermission();
   }
 
   onLogin(context) {
-    if (username.value.text == dataUser['username'] &&
-        password.value.text == dataUser['password']) {
-      SessionHelper.setUsername(dataUser['username']);
-      Get.offAllNamed(navigatorHelper.dashboard);
-    } else {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              child: Container(
-                height: 150,
-                padding: EdgeInsets.all(20),
-                child: Center(
-                    child: Text('Username dan Password tidak diketahui')),
-              ),
-            );
-          });
-    }
+    // if (username.value.text == dataUser['username'] &&
+    //     password.value.text == dataUser['password']) {
+    //   SessionHelper.setUsername(dataUser['username']);
+    //   Get.offAllNamed(navigatorHelper.dashboard);
+    // } else {
+    //   showDialog(
+    //       context: context,
+    //       builder: (context) {
+    //         return Dialog(
+    //           shape: RoundedRectangleBorder(
+    //               borderRadius: BorderRadius.circular(10)),
+    //           child: Container(
+    //             height: 150,
+    //             padding: EdgeInsets.all(20),
+    //             child: Center(
+    //                 child: Text('Username dan Password tidak diketahui')),
+    //           ),
+    //         );
+    //       });
+    // }
   }
 
   Future<void> requestLocationPermission() async {

@@ -1,5 +1,5 @@
 class NavigatorHelper {
-  String root = "/";
+  String root = "/Splash";
   String contactUs = "/ContactUs";
   String dashboard = "/Dashboard";
   String profile = "/Profile";

@@ -1,7 +1,6 @@
 import 'package:brief_project/core/helper/navigator_helper.dart';
 import 'package:brief_project/core/helper/splash_screen.dart';
 import 'package:brief_project/core/material/color_material.dart';
-import 'package:brief_project/feature/dashboard/presentation/controller/dashboard._controller.dart';
 import 'package:brief_project/feature/dashboard/presentation/page/main_dashboard.dart';
 import 'package:brief_project/feature/login/presentation/controller/controller_login.dart';
 import 'package:brief_project/feature/profile/presentation/controller/profile_controller.dart';
@@ -10,6 +9,7 @@ import 'package:brief_project/feature/profile/presentation/widget/show_profile.d
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'core/helper/session.dart';
 import 'feature/login/presentation/page/main _login_page.dart';
 import 'feature/login/presentation/page/main_register.dart';
 
@@ -20,9 +20,9 @@ void main() {
 class Dependency implements Bindings {
   @override
   void dependencies() {
-    Get.put<DashboardConttoller>(DashboardConttoller());
     Get.put<ProfileController>(ProfileController());
     Get.put<LoginController>(LoginController());
+    Get.put<AuthController>(AuthController());
   }
 }
 
@@ -49,6 +49,10 @@ class MyApp extends StatelessWidget {
                   top: 10,
                 ))),
         getPages: [
+          GetPage(
+            name: navigatorHelper.root,
+            page: () => SplashScreen(),
+          ),
           GetPage(
             name: navigatorHelper.login,
             page: () => MainLoginPage(),

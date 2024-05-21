@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:brief_project/core/material/resolution_size.dart';
 import 'package:brief_project/feature/profile/presentation/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:get/get.dart';
 import '../../../../core/helper/navigator_helper.dart';
 import '../../../../core/material/color_material.dart';
 import '../../../../core/material/material_decoration.dart';
+import '../../../../core/material/text_style_material.dart';
 
 class ProfileBody {
   final controller = Get.find<ProfileController>();
@@ -13,20 +16,54 @@ class ProfileBody {
 
   Widget body(BuildContext context) {
     return Obx(
-      () => Center(
-        child: ListView.builder(
-          itemCount: controller.listResponseEntity.length,
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            return _buildCard(
-                "suratJalan : ${controller.listResponseEntity[index].NamaSuratJalan}",
-                "supir: ${controller.listResponseEntity[index].NamaSupir}",
-                "regis : ${controller.listResponseEntity[index].NomerRegistrasi}",
-                "polisi ${controller.listResponseEntity[index].NomerPolisi}",
-                index,
-                context);
-          },
-        ),
+      () => Center(child: validateList(context)),
+    );
+  }
+
+  getListLoaded() {
+    return ListView.builder(
+      itemCount: controller.listResponseEntity.length,
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        return _buildCard(
+            "Surat Jalan : ${controller.listResponseEntity[index].NamaSuratJalan}",
+            "Supir : ${controller.listResponseEntity[index].NamaSupir}",
+            "Regis : ${controller.listResponseEntity[index].NomerRegistrasi}",
+            "Nomer Polisi : ${controller.listResponseEntity[index].NomerPolisi}",
+            "${controller.listResponseEntity[index].photoPath}",
+            index,
+            context);
+      },
+    );
+  }
+
+  validateList(context) {
+    if (controller.getListDone.isFalse) {
+      return getListLoading(context);
+    } else if (controller.listResponseEntity.isEmpty &&
+        controller.getListDone.isTrue) {
+      return getListEmpty();
+    } else {
+      return getListLoaded();
+    }
+  }
+
+  getListLoading(context) {
+    return Container(
+      alignment: Alignment.center,
+      width: MediaQuery.of(context).size.width,
+      child: SizedBox(
+        width: 200,
+        child: LinearProgressIndicator(),
+      ),
+    );
+  }
+
+  getListEmpty() {
+    return Center(
+      child: Text(
+        'List  tidak tersedia',
+        style: materialTextStyle.mediumTextStylePrimaryOpacity6,
       ),
     );
   }
@@ -36,6 +73,7 @@ class ProfileBody {
     String supir,
     String regis,
     String polisi,
+    String img,
     int index,
     BuildContext context,
   ) {
@@ -44,7 +82,13 @@ class ProfileBody {
         children: [
           resolutionSize.largeResolutionSpaceHeight,
           InkWell(
-            onTap: () => Get.toNamed(_navigatorHelper.openProfilePhoto),
+            onTap: () {
+              controller.selectedindexlist.value =
+                  controller.listResponseEntity[index];
+              log(controller.selectedindexlist.value.photoPath.toString());
+
+              Get.toNamed(_navigatorHelper.openProfilePhoto);
+            },
             child: Column(
               children: [
                 Container(
@@ -60,14 +104,15 @@ class ProfileBody {
                         offset: Offset(1, 1),
                       ),
                     ],
-                    image: controller.selectedImage.value.path == ''
-                        ? null
-                        : DecorationImage(
-                            image: FileImage(controller.selectedImage.value),
-                            fit: BoxFit.fill,
-                          ),
+                    image:
+                        controller.listResponseEntity[index].photoPath == null
+                            ? null
+                            : DecorationImage(
+                                image: NetworkImage(img),
+                                fit: BoxFit.fill,
+                              ),
                   ),
-                  child: controller.selectedImage.value.path == ''
+                  child: controller.listResponseEntity[index].photoPath == null
                       ? Icon(
                           Icons.camera_alt,
                           color: colorGray,
@@ -82,7 +127,11 @@ class ProfileBody {
                   child: ElevatedButton(
                     style: materialDecoration.buttonStylePrimary,
                     onPressed: () {
+                      controller.selectedindexlist.value =
+                          controller.listResponseEntity[index];
+
                       controller.showValidatedOpenCamOrGallery();
+                      log("message => ${controller.selectedindexlist.value.NomerRegistrasi}");
                     },
                     child: Text('Edit Profil'),
                   ),
@@ -91,13 +140,11 @@ class ProfileBody {
             ),
           ),
           SizedBox(height: 10),
-          Text(
-            supir,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(supir, style: materialTextStyle.formTitleTextStyle),
+          Obx(() => Text(
+                'Suhu : ${controller.listResponseEntity[index].bodyTemperature ?? '-'} ∘celcius',
+                style: materialTextStyle.normalTextStylePrimary,
+              )),
           Text(
             suratJalan,
             style: TextStyle(
@@ -116,17 +163,22 @@ class ProfileBody {
               fontSize: 14,
             ),
           ),
-          Text(
-            "Lokasi Kordinat",
-            style: TextStyle(
-              fontSize: 14,
-            ),
-          ),
-          Text(
-            "${controller.lat.value}, ${controller.long.value}",
-            style: TextStyle(
-              fontSize: 14,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Lokasi Kordinat : ",
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                "${controller.lat.value}, ${controller.long.value}",
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
           resolutionSize.largeResolutionSpaceHeight,
           Column(
@@ -135,30 +187,35 @@ class ProfileBody {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 50,
+                    width: 150,
                     child: TextField(
-                      keyboardType: TextInputType.number,
+                      controller: controller.textControllers[index],
+                      keyboardType: TextInputType.phone,
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
+                        hintText: 'Update suhu...',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
                       ),
                       onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          controller.count.value = int.parse(value);
-                        } else {
-                          controller.count.value = 0;
-                        }
+                        log("onChanged ${controller.listResponseEntity[index].NomerRegistrasi}");
                       },
                     ),
                   ),
+                  resolutionSize.normalResolutionSpaceWidth,
+                  ElevatedButton(
+                    onPressed: () {
+                      controller.selectedindexlist.value =
+                          controller.listResponseEntity[index];
+                      controller.submitBodyTemperature(index);
+                    },
+                    style: materialDecoration.buttonStylePrimary,
+                    child: Text('Submit'),
+                  )
                 ],
               ),
               SizedBox(
                 height: 5,
-              ),
-              Text(
-                "derajat",
-                style: TextStyle(fontSize: 14),
               ),
             ],
           ),
@@ -166,7 +223,7 @@ class ProfileBody {
             thickness: 2,
             color: colorPrimary,
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 20)
         ],
       ),
     );

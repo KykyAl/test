@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:brief_project/core/helper/navigator_helper.dart';
+import 'package:brief_project/core/helper/session.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,6 +16,7 @@ class LoginBody extends StatelessWidget {
   @override
   Widget build(context) {
     var controller = Get.find<LoginController>();
+    var session = Get.find<AuthController>();
     return Padding(
       padding: EdgeInsets.all(20.0),
       child: Column(
@@ -47,7 +51,17 @@ class LoginBody extends StatelessWidget {
           ),
           SizedBox(height: 20.0),
           ElevatedButton(
-            onPressed: () => controller.inLogin(),
+            onPressed: () {
+              if (controller.username.value.text.isEmpty ||
+                  controller.password.value.text.isEmpty) {
+                Get.snackbar("Hii", "Tolong berikan data yang lengkap ges");
+              } else {
+                String token = 'token';
+                log("token ${token}");
+                session.authenticate(token);
+                return controller.inLogin();
+              }
+            },
             child: Text('Login'),
           ),
           SizedBox(height: 10.0),
