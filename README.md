@@ -2,7 +2,7 @@
 Jika ingin Menjalankannya ini saya masih di local 
 harus setup terlebih dahulu dengan mengkoneksikan database dan file file phpnya . 
 bisa di install di lsit folder nya dengan git clone dan di pindahkan file extensinya buat folder baru  dan tablenya di import sqlnya ke local 
-##  install foldernya sql dan phpnya di google drive 
+##  install foldernya phpnya dan sqlnya di google drive 
 https://drive.google.com/drive/folders/18ZpeXHKFM57mBE_H_eIzHhNmyRX_cDbl?usp=drive_link
 This project is a starting point for a Flutter application.
 
